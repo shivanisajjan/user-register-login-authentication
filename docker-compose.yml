@@ -1,0 +1,175 @@
+version: '2'
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    restart: always
+    volumes:
+      - $HOME/mongo:/data/db
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - $HOME/neo4j:/data/db
+    environment:
+      NEO4J_AUTH : none
+
+
+  eureka-server:
+    build: eureka-server
+    image: eureka-server:1.0.0
+    container_name: eureka-server
+    ports:
+      - 8085:8085
+
+
+  config-server:
+    build: config-server
+    image: config-server:1.0.0
+    container_name: config-server
+    restart: always
+    ports:
+      - 8888:8888
+
+  api-gateway:
+    build: api-gateway
+    image: api-gateway:1.0.0
+    container_name: api-gateway
+    restart: always
+    depends_on:
+      - eureka-server
+      - user-management
+      - profile-service
+      - content-service
+      - recommendation-service
+    ports:
+      - 8080:8080
+    links:
+      - user-management
+      - eureka-server
+      - profile-service
+      - content-service
+      - recommendation-service
+
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    container_name: rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+      - 15672:15672
+      - 8045:5762
+
+  recommendation-service:
+    build: recommendation-service
+    container_name: recommendation-service
+    restart: always
+    depends_on:
+      - neo4j
+      - rabbitmq
+      - config-server
+      - eureka-server
+    ports:
+      - 8081:8081
+
+  user-management:
+    build: user-management
+    image: user-management:1.0.0
+    container_name: user-management
+    restart: always
+    depends_on:
+      - mysql
+      - rabbitmq
+      - config-server
+      - eureka-server
+    links:
+      - mysql
+      - rabbitmq
+      - config-server
+      - eureka-server
+
+  profile-service:
+    build: profile-service
+    image: profile-service:1.0.0
+    container_name: profile-service
+    restart: always
+    depends_on:
+      - mongo
+      - rabbitmq
+      - config-server
+      - eureka-server
+    links:
+      - mongo
+      - rabbitmq
+      - config-server
+      - eureka-server
+
+  content-service:
+      build: content-service
+      container_name: content-service
+      restart: always
+      depends_on:
+        - mongo
+        - rabbitmq
+        - config-server
+        - eureka-server
+      links:
+        - mongo
+        - rabbitmq
+        - config-server
+        - eureka-server
+      ports:
+        - 8082:8082
+
+#  recommendation-service:
+#     build: recommendation-service
+#     container_name: recommendation-service
+#     restart: always
+#     depends_on:
+#       - neo4j
+#     ports:
+#        - 8081:8081
+#
+#
+#  neo4j:
+#     image: neo4j:latest
+#     ports:
+#       - "7474:7474"
+#       - "7687:7687"
+#     volumes:
+#       - $HOME/neo4j:/data/db
+#     environment:
+#       NEO4J_AUTH : none
+#
+#
+#  publishing-service:
+#      build: publishing-service
+#      container_name: publishing-service
+#      restart: always
+#      depends_on:
+#        - mongo
+#        - rabbitmq
+#        - config-server
+#        - eureka-server
+#      links:
+#        - mongo
+#        - rabbitmq
+#        - config-server
+#        - eureka-server
+#      ports:
+#        - 8081:8081
+#      expose:
+#        - 8081
+#
+

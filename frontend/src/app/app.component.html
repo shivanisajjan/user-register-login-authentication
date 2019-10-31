@@ -1,0 +1,56 @@
+<!-- new landing page -->
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer class="sidenav" fixedInViewport
+               opened="false"
+               [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+               mode="over"
+  >
+    <mat-toolbar color="primary">Menu</mat-toolbar>
+    <mat-nav-list  >
+      <mat-form-field class="search-form" color="accent">
+        <input matInput type="search" placeholder="Search" >
+      </mat-form-field>
+      <button mat-icon-button (click)="search()"><mat-icon>search</mat-icon></button>
+      <a mat-list-item href="#">Link 1</a>
+      <a mat-list-item href="#">Link 2</a>
+      <a mat-list-item href="#">Link 3</a>
+      <a mat-list-item href="#">Link 4</a>
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content class="navbar">
+    <mat-toolbar color="primary" style="justify-content: space-between;">
+      <button
+        type="button"
+        aria-label="Toggle sidenav"
+        mat-icon-button
+        (click)="drawer.toggle()"
+        *ngIf="!showNavigationBarLinks">
+        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+      </button>
+      <nav class="navbar navbar-dark ">
+        <a class="navbar-brand" routerLink="/home">
+          <img src="https://www.logolynx.com/images/logolynx/36/362087235008be84086f892df697f50d.png" width="30" height="30" class="d-inline-block align-top" alt="">
+          ontently
+        </a>
+      </nav>
+      <div>
+        <mat-nav-list *ngIf="showNavigationBarLinks" >
+          <mat-form-field class="search-form" color="accent">
+            <input matInput type="search" placeholder="Search" >
+          </mat-form-field>
+          <button mat-icon-button (click)="search()"><mat-icon>search</mat-icon></button>
+          <a mat-button routerLink="/register">Register</a>
+          <a mat-button routerLink="/dashboard">Dashboard</a>
+          <a mat-button (click)="onLogin()">Login</a>
+        </mat-nav-list>
+      </div>
+    </mat-toolbar>
+    <!-- Add Content Here -->
+    <div class="parallax">
+      <div class="router-component-wrapper">
+        <router-outlet></router-outlet>
+        <app-footer></app-footer>
+      </div>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
